@@ -2594,28 +2594,19 @@ function aiosp_google_analytics() {
 	}
 	
 	function trim_excerpt_without_filters( $text, $max = 0 ) {
-		$text = str_replace( ']]>', ']]&gt;', $text );
-                $text = preg_replace( '|\[(.+?)\](.+?\[/\\1\])?|s', '', $text );
-		$text = wp_strip_all_tags( $text );
-		if ( !$max ) $max = $this->maximum_description_length;
-		$len = $this->strlen( $text );
-		if ( $max < $len ) {
-			if ( function_exists( 'mb_strrpos' ) ) {
-				$pos = mb_strrpos( $text, ' ', -($len - $max) );
-				if ( $pos === false ) $pos = $max;
-				if ( $pos > $this->minimum_description_length ) {
-					$max = $pos;
-				} else {
-					$max = $this->minimum_description_length;
-				}
-			} else {
-				while( $text[$max] != ' ' && $max > $this->minimum_description_length ) {
-					$max--;
-				}				
-			}
-		}
-		$text = $this->substr( $text, 0, $max );
-		return trim( stripslashes( $text ) );
+	    $text = str_replace( ']]>', ']]&gt;', $text );
+		$text = preg_replace( '|\[(.+?)\](.+?\[/\\1\])?|s', '', $text );
+	    $text = strip_tags( $text );
+	    if ( !$max ) $max = $this->maximum_description_length;
+
+	    if ( $max < $this->strlen( $text ) ) {
+	        while((ord($text[$max]) & 0x80) != 0 && (ord($text[$max]) & 0x40) == 0 
+	              && $max > $this->minimum_description_length ) {
+	            $max--;
+	        }
+	    }
+	    $text = substr( $text, 0, $max );
+	    return trim( stripcslashes( $text ) );
 	}
 	
 	function trim_excerpt_without_filters_full_length( $text ) {
